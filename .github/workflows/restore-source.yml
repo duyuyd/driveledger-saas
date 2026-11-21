@@ -1,0 +1,31 @@
+name: Import DriveLedger source (one-time)
+on:
+  push:
+    paths:
+      - '_bootstrap/manifest.sha256'
+jobs:
+  restore:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Validate source archive and restore
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat _bootstrap/part*.txt | base64 --decode > /tmp/driveledger.tar.xz
+          echo "$(cat _bootstrap/manifest.sha256)  /tmp/driveledger.tar.xz" | sha256sum -c -
+          tar -xJf /tmp/driveledger.tar.xz -C .
+          rm -rf _bootstrap .github/workflows/restore-source.yml
+      - name: Commit restored source to main
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "NPT duy"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "feat: import DriveLedger SaaS web mobile and database source"
+          git push origin HEAD:main
