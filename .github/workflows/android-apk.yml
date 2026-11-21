@@ -58,7 +58,7 @@ jobs:
           apk=app/build/outputs/apk/release/app-release.apk
           test -s "$apk"
           unzip -t "$apk" >/dev/null
-          if ! unzip -Z1 "$apk" | grep -q '^assets/index.android.bundle$'; then
+          if ! unzip -p "$apk" assets/index.android.bundle > /dev/null; then
             echo '::error::No embedded JS bundle: not a standalone APK'
             exit 1
           fi
