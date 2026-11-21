@@ -6,7 +6,7 @@ on:
     branches: [main]
     types: [completed]
 permissions:
-  contents: read
+  contents: write
 jobs:
   build-apk:
     if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
@@ -25,31 +25,22 @@ jobs:
           java-version: '17'
       - name: Install Android SDK
         uses: android-actions/setup-android@v4
-      - name: Report Supabase configuration status
-        env:
-          SUPABASE_URL: ${{ vars.EXPO_PUBLIC_SUPABASE_URL }}
-          SUPABASE_KEY: ${{ vars.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+      - name: Load public backend settings
         run: |
-          if [[ "$SUPABASE_URL" != https://*.supabase.co || -z "$SUPABASE_KEY" ]]; then
-            echo '::warning::Supabase not connected: APK will display setup-only mode; not a commercial release.';
-          fi
+          for attempt in {1..20}; do
+            if node scripts/mobile-build-env.mjs; then exit 0; fi
+            sleep 10
+          done
+          exit 1
       - name: Install dependencies
-        run: npm install --no-audit --no-fund
+        run: npm ci --no-audit --no-fund
       - name: Validate mobile types
         run: npm run typecheck:mobile
       - name: Generate Android native project
         working-directory: apps/mobile
-        env:
-          EXPO_PUBLIC_SUPABASE_URL: ${{ vars.EXPO_PUBLIC_SUPABASE_URL }}
-          EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ vars.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
-          EXPO_PUBLIC_WEB_URL: ${{ vars.EXPO_PUBLIC_WEB_URL }}
         run: npx expo prebuild --platform android --non-interactive --no-install
       - name: Build standalone release-variant APK (debug key, preview only)
         working-directory: apps/mobile/android
-        env:
-          EXPO_PUBLIC_SUPABASE_URL: ${{ vars.EXPO_PUBLIC_SUPABASE_URL }}
-          EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ vars.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
-          EXPO_PUBLIC_WEB_URL: ${{ vars.EXPO_PUBLIC_WEB_URL }}
         run: chmod +x gradlew && ./gradlew assembleRelease --no-daemon
       - name: Validate embedded JS and APK structure
         working-directory: apps/mobile/android
@@ -58,15 +49,35 @@ jobs:
           apk=app/build/outputs/apk/release/app-release.apk
           test -s "$apk"
           unzip -t "$apk" >/dev/null
-          if ! unzip -p "$apk" assets/index.android.bundle > /dev/null; then
-            echo '::error::No embedded JS bundle: not a standalone APK'
-            exit 1
-          fi
-          echo 'Standalone JS bundle present.'
-      - name: Publish installable standalone preview APK
+          unzip -p "$apk" assets/index.android.bundle > "$RUNNER_TEMP/driveledger.bundle"
+          test -s "$RUNNER_TEMP/driveledger.bundle"
+          apksigner=$(find "$ANDROID_HOME/build-tools" -type f -name apksigner | sort -V | tail -1)
+          "$apksigner" verify --verbose "$apk"
+          cp "$apk" "$GITHUB_WORKSPACE/DriveLedger-NPT-duy-Android.apk"
+      - name: Publish validated APK artifact
         uses: actions/upload-artifact@v7
         with:
-          name: DriveLedger-0.2.0-NPT-Duy-Standalone-Preview
-          path: apps/mobile/android/app/build/outputs/apk/release/app-release.apk
+          name: DriveLedger-NPT-duy-Android
+          path: DriveLedger-NPT-duy-Android.apk
           if-no-files-found: error
           retention-days: 14
+      - name: Enable Android emulator acceleration
+        run: sudo chmod a+rw /dev/kvm
+      - name: Install and launch APK on Android 14
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d
+        with:
+          api-level: 34
+          arch: x86_64
+          disable-animations: true
+          script: bash scripts/check-android-launch.sh
+      - name: Publish downloadable APK for this main revision
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          sha=$(git rev-parse HEAD)
+          tag="android-${sha:0:12}"
+          if ! gh release view "$tag" >/dev/null 2>&1; then
+            gh release create "$tag" --target "$sha" --title "DriveLedger · NPT duy · Android (${sha:0:8})" --notes "APK thử nghiệm dùng độc lập, ký bằng khóa phát triển. Nhà phát triển NPT duy." --prerelease
+          fi
+          gh release upload "$tag" DriveLedger-NPT-duy-Android.apk --clobber

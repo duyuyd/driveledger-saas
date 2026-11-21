@@ -3,6 +3,8 @@ import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase";
 import type { CSSProperties, ReactNode } from "react";
 
+const appleWebApp: Metadata["appleWebApp"] = { capable: true, title: "DriveLedger", statusBarStyle: "default" };
+
 export const dynamic = "force-dynamic";
 
 const backendConfigured = () => Boolean(
@@ -12,13 +14,13 @@ const backendConfigured = () => Boolean(
 
 export async function generateMetadata(): Promise<Metadata> {
   if (!backendConfigured()) return {
-    title: "DriveLedger | NPT duy",
+    title: "DriveLedger | NPT duy", appleWebApp,
     description: "Hệ thống quản lý dạy lái xe đang chuẩn bị kết nối cơ sở dữ liệu riêng.",
     robots: { index: false, follow: false },
   };
   const db = await createClient();
   const { data } = await db.from("platform_settings").select("value").eq("key", "site_title").maybeSingle();
-  return { title: typeof data?.value === "string" ? data.value : "DriveLedger", description: "Nền tảng quản lý giáo viên và trung tâm dạy lái xe" };
+  return { appleWebApp, title: typeof data?.value === "string" ? data.value : "DriveLedger", description: "Nền tảng quản lý giáo viên và trung tâm dạy lái xe" };
 }
 
 function NotConfigured() {
