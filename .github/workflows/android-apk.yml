@@ -1,21 +1,21 @@
 name: Android Debug APK — DriveLedger NPT duy
 on:
   workflow_dispatch:
-  push:
+  workflow_run:
+    workflows: ["Check web, mobile and domain invariants"]
     branches: [main]
-    paths:
-      - 'apps/mobile/**'
-      - 'package.json'
-      - 'package-lock.json'
-      - '.github/workflows/android-apk.yml'
+    types: [completed]
 permissions:
   contents: read
 jobs:
   build-apk:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
       - uses: actions/setup-node@v7
         with:
           node-version: '22'
