@@ -28,14 +28,15 @@ export default async function Dashboard({searchParams}:{searchParams:Promise<{er
   ]);
   const queryError=reportRes.error||lessonRes.error;
   if(queryError)throw new Error(queryError.message);
-  const income=Number(reportRes.data?.income_vnd??0);
-  const expense=Number(reportRes.data?.expense_vnd??0);
-  const km=Number(reportRes.data?.gps_distance_m??0)/1000;
+  const report=reportRes.data as {income_vnd:number;expense_vnd:number;gps_distance_m:number;student_count:number}|null;
+  const income=Number(report?.income_vnd??0);
+  const expense=Number(report?.expense_vnd??0);
+  const km=Number(report?.gps_distance_m??0)/1000;
   const cards=[
     {name:"Tổng thu đã xác nhận",value:amountVnd(income),icon:Wallet,note:"Trong tháng hiện tại"},
     {name:"Tổng chi đã xác nhận",value:amountVnd(expense),icon:TrendingUp,note:"Trong tháng hiện tại"},
     {name:"Lợi nhuận thuần",value:amountVnd(income-expense),icon:ArrowUpRight,note:"Thu − Chi (chưa tính thuế)"},
-    {name:"Học viên đang quản lý",value:String(reportRes.data?.student_count??0),icon:BookUser,note:`GPS đã ghi: ${km.toLocaleString("vi-VN",{maximumFractionDigits:1})} km`},
+    {name:"Học viên đang quản lý",value:String(report?.student_count??0),icon:BookUser,note:`GPS đã ghi: ${km.toLocaleString("vi-VN",{maximumFractionDigits:1})} km`},
   ];
   return <>
     <div className="topbar"><div><h1 className="page-title">Tổng quan</h1><p className="subtitle">{organization.name} · {user.email}</p></div><Link className="btn" href="/dashboard/students">Thêm học viên <ArrowUpRight size={17}/></Link></div>
