@@ -1,0 +1,19 @@
+{
+  "name": "driveledger-saas",
+  "private": true,
+  "version": "0.2.0",
+  "workspaces": [
+    "apps/web",
+    "apps/mobile"
+  ],
+  "scripts": {
+    "dev:web": "npm run dev --workspace @driveledger/web",
+    "dev:mobile": "npm run start --workspace @driveledger/mobile",
+    "typecheck:web": "npm run typecheck --workspace @driveledger/web",
+    "typecheck:mobile": "npm run typecheck --workspace @driveledger/mobile",
+    "test": "node --test tests/*.test.mjs"
+  },
+  "engines": {
+    "node": ">=22.13.0"
+  }
+}

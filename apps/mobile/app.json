@@ -1,0 +1,44 @@
+{
+  "expo": {
+    "name": "DriveLedger",
+    "slug": "driveledger",
+    "scheme": "driveledger",
+    "version": "0.2.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "android": {
+      "package": "vn.driveledger.mobile",
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION"
+      ],
+      "versionCode": 2
+    },
+    "ios": {
+      "bundleIdentifier": "vn.driveledger.mobile",
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Dùng GPS để ghi lại quãng đường thực hành khi bạn bắt đầu chuyến đi."
+      },
+      "buildNumber": "2"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Cho phép DriveLedger ghi GPS trong thời gian thực hành.",
+          "isIosBackgroundLocationEnabled": false,
+          "isAndroidBackgroundLocationEnabled": false
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": null
+      }
+    },
+    "description": "DriveLedger - NPT duy. Ứng dụng quản lý giáo viên dạy lái xe."
+  }
+}
