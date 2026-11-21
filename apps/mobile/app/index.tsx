@@ -272,9 +272,9 @@ const styles=StyleSheet.create({
   button:{minHeight:47,backgroundColor:"#2563eb",alignItems:"center",justifyContent:"center",borderRadius:12,marginTop:10,paddingHorizontal:14},
   buttonText:{color:"#fff",fontWeight:"700",fontSize:15},secondary:{backgroundColor:"#eaf0fa"},danger:{backgroundColor:"#ae2d3b"},
   tabBar:{backgroundColor:"#fff",flexDirection:"row",padding:9,gap:5},tab:{flex:1,paddingVertical:11,alignItems:"center",borderRadius:10},activeTab:{backgroundColor:"#2563eb"},tabText:{fontSize:12,fontWeight:"700",color:"#586a83"},
-  choice:{backgroundColor:"#e8edf7",borderRadius:9,paddingVertical:9,paddingHorizontal:12},choiceActive:{backgroundColor:"#2563eb"},choiceText:{color:"#253a59",fontSize:13,fontWeight:"650"},
+  choice:{backgroundColor:"#e8edf7",borderRadius:9,paddingVertical:9,paddingHorizontal:12},choiceActive:{backgroundColor:"#2563eb"},choiceText:{color:"#253a59",fontSize:13,fontWeight:"600"},
   choices:{flexDirection:"row",gap:8,marginBottom:15,paddingVertical:4},
   listItem:{backgroundColor:"#fff",borderRadius:13,borderWidth:1,borderColor:"#e3eaf4",padding:14,marginBottom:9},
   itemTitle:{fontSize:15,fontWeight:"700",color:"#1c2940"},metric:{fontSize:45,fontWeight:"800",color:"#2563eb",textAlign:"center",marginTop:20},
-  alert:{backgroundColor:"#fff6e6",color:"#825314",padding:12,borderRadius:10,overflow:"hidden",fontSize:13,marginVertical:12},logout:{color:"#475467",fontSize:13,fontWeight:"650"},
+  alert:{backgroundColor:"#fff6e6",color:"#825314",padding:12,borderRadius:10,overflow:"hidden",fontSize:13,marginVertical:12},logout:{color:"#475467",fontSize:13,fontWeight:"600"},
 });
