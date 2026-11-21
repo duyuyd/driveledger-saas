@@ -4,7 +4,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import * as Location from "expo-location";
 import * as Crypto from "expo-crypto";
 import type { Session } from "@supabase/supabase-js";
-import { db } from "../lib/supabase";
+import { db as optionalDb, backendConfigured } from "../lib/supabase";
+const db=optionalDb!;
 import { distanceMeters, plausibleHop } from "../lib/gps.mjs";
 
 type Org = { id:string;name:string };
@@ -30,6 +31,7 @@ function Choice({selected,label,onPress}:{selected:boolean;label:string;onPress:
 export default function MainScreen(){
   const [brand,setBrand]=useState({name:"DriveLedger",color:"#2563eb",developer:"NPT duy"});
   useEffect(()=>{
+    if(!backendConfigured)return;
     let alive=true;
     void db.from("platform_settings").select("key,value").in("key",["site_title","brand_color","developer_name"]).then(({data})=>{
       if(!alive)return;
@@ -39,6 +41,14 @@ export default function MainScreen(){
     });
     return ()=>{alive=false;};
   },[]);
+  if(!backendConfigured) return <SafeAreaView style={styles.root}>
+    <View style={{flex:1,justifyContent:"center",padding:26}}>
+      <Text style={styles.logo}>🚘 DriveLedger v0.2.0</Text>
+      <Text style={[styles.heading,{marginTop:18}]}>Đang thiết lập dữ liệu</Text>
+      <Text style={styles.sub}>Bản Android đã được đóng gói, nhưng máy chủ Supabase riêng chưa được kích hoạt. Chưa thể đăng nhập, quản lý học viên hoặc ghi GPS.</Text>
+      <Text style={[styles.sub,{marginTop:24}]}>Nhà phát triển: NPT duy</Text>
+    </View>
+  </SafeAreaView>;
   return <BrandContext.Provider value={brand}><MainContent/></BrandContext.Provider>;
 }
 function MainContent(){
