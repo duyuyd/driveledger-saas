@@ -1,4 +1,4 @@
-name: Android Debug APK — DriveLedger NPT duy
+name: Android Standalone Preview APK — DriveLedger NPT duy
 on:
   workflow_dispatch:
   workflow_run:
@@ -44,9 +44,34 @@ jobs:
           EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ vars.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
           EXPO_PUBLIC_WEB_URL: ${{ vars.EXPO_PUBLIC_WEB_URL }}
         run: npx expo prebuild --platform android --non-interactive --no-install
-      - name: Build signed debug APK
+      - name: Build standalone release-variant APK (debug key, preview only)
         working-directory: apps/mobile/android
-        run: chmod +x gradlew && ./gradlew assembleDebug --no-daemon
+        env:
+          EXPO_PUBLIC_SUPABASE_URL: ${{ vars.EXPO_PUBLIC_SUPABASE_URL }}
+          EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ vars.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+          EXPO_PUBLIC_WEB_URL: ${{ vars.EXPO_PUBLIC_WEB_URL }}
+        run: chmod +x gradlew && ./gradlew assembleRelease --no-daemon
+      - name: Validate embedded JS and APK structure
+        working-directory: apps/mobile/android
+        run: |
+          set -euo pipefail
+          apk=app/build/outputs/apk/release/app-release.apk
+          test -s "$apk"
+          unzip -t "$apk" >/dev/null
+          if ! unzip -Z1 "$apk" | grep -q '^assets/index.android.bundle
+      - name: Publish installable standalone preview APK
+        uses: actions/upload-artifact@v7
+        with:
+          name: DriveLedger-0.2.0-NPT-Duy-Standalone-Preview
+          path: apps/mobile/android/app/build/outputs/apk/release/app-release.apk
+          if-no-files-found: error
+          retention-days: 14
+; then
+            echo '::error::No embedded JS bundle: not a standalone APK'
+            exit 1
+          fi
+          echo 'Standalone JS bundle present.'
+
       - name: Publish installable debug APK
         uses: actions/upload-artifact@v7
         with:
