@@ -31,7 +31,7 @@ export default async function Settings({searchParams}:{searchParams:Promise<{err
         <div className="field"><label>Phân quyền</label><select name="role" defaultValue="instructor"><option value="instructor">Giáo viên</option><option value="manager">Quản lý</option><option value="accountant">Kế toán</option><option value="viewer">Chỉ xem</option></select></div>
         <div className="field-full"><button className="btn">Thêm / cập nhật nhân viên</button></div>
       </form>
-      {staff?.data?.length?<div className="table-wrap"><table className="data-table"><thead><tr><th>Email</th><th>Vai trò</th></tr></thead><tbody>{staff.data.map(m=><tr key={m.user_id}><td>{m.email}</td><td>{m.role}</td></tr>)}</tbody></table></div>:<p className="empty">Chưa có nhân viên.</p>}
+      {staff?.data?.length?<div className="table-wrap"><table className="data-table"><thead><tr><th>Email</th><th>Vai trò</th></tr></thead><tbody>{staff.data.map((m:{user_id:string;email:string;role:string})=><tr key={m.user_id}><td>{m.email}</td><td>{m.role}</td></tr>)}</tbody></table></div>:<p className="empty">Chưa có nhân viên.</p>}
     </section>}
     {profile.data?.system_role==="super_admin"&&<section className="panel"><h2 className="section-title" style={{marginBottom:18}}>Super Admin · Cấu hình toàn nền tảng</h2><form action={savePlatformSettings} className="form-grid">
       <div className="field"><label>Tên thương hiệu</label><input name="site_title" defaultValue={String(cfg.site_title??"")} required/></div>
